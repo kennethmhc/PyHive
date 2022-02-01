@@ -44,7 +44,9 @@ paramstyle = 'pyformat'  # Python extended format codes, e.g. ...WHERE name=%(na
 _logger = logging.getLogger(__name__)
 
 _TIMESTAMP_PATTERN = re.compile(r'(\d+-\d+-\d+ \d+:\d+:\d+(\.\d{,6})?)')
-
+_CA_FILE_PATH = 'ca_chain'
+_KEYFILE_PATH = 'keyfile'
+_CERTFILE_PATH = 'certfile'
 
 def _parse_timestamp(value):
     if value:
@@ -261,6 +263,7 @@ class Connection(object):
         response = self._client.CloseSession(req)
         self._transport.close()
         _check_status(response)
+        _remove_pem_files()
 
     def commit(self):
         """Hive does not support transactions, so this does nothing."""
@@ -564,14 +567,25 @@ def _generate_pem_files(keystore_path, truststore_path, password):
     for alias, cert in truststore.certs.items():
         ca_chain = ca_chain + _bytes_to_pem_str(cert.cert, "CERTIFICATE")
 
-    with open('ca_chain', 'w') as f:
+    with open(_CA_FILE_PATH, 'w') as f:
         f.write(ca_chain)
 
-    with open('keyfile', 'w') as f:
+    with open(_KEYFILE_PATH, 'w') as f:
         f.write(private_keys)
 
-    with open('certfile', 'w') as f:
+    with open(_CERTFILE_PATH, 'w') as f:
         f.write(certs)
+
+
+def _remove_pem_files():
+    _remove_file(_CA_FILE_PATH)
+    _remove_file(_KEYFILE_PATH)
+    _remove_file(_CERTFILE_PATH)
+
+
+def _remove_file(filename):
+    if os.path.exists(filename):
+        os.remove(filename)
 
 
 def _bytes_to_pem_str(der_bytes, pem_type):
