@@ -2,6 +2,7 @@
 
 from setuptools import setup
 from setuptools.command.test import test as TestCommand
+import pyhive
 import sys
 
 
@@ -23,7 +24,7 @@ with open('README.rst') as readme:
 
 setup(
     name="PyHopsHive",
-    version="0.6.4.1",
+    version=pyhive.__version__,
     description="Python interface to Hops Hive",
     long_description=long_description,
     url='https://github.com/logicalclocks/PyHive',
